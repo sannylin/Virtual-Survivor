@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <!-- load the firebase and jQuery libraries -->
+    <script src='https://cdn.firebase.com/v0/firebase.js'></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script> 
+    <title>Survivor</title>
+  </head>
+ 
+  <body> 
+     
+ 
+    <!-- you can insert javascript in a webpage using the <script> tag -->
+    <script>
+ 
+        // load jQuery on j
+        var j = jQuery.noConflict();
+ 
+        // create our firebase variable --> you'll want to replace
+        // the first part of the domain name with your own firebase name
+        // notice the 'count' at the end --- this is the key we'll create
+        // and use in the firebase
+        var fb = new Firebase("https://internet-survivor.firebaseio.com/player");
+        
+
+        //global variables
+        var you;
+        var first = true;
+        var other;
+ 
+        // check to make sure the page has fully loaded. once it has, setup
+        // a few things
+        j(document).ready(function() {
+ 
+            fb.once('value',function(dataSnapshot) {
+              you = dataSnapshot.val();
+
+              if(you){
+                fb.set(false);
+              }
+              else{
+                fb.set(true);
+              }
+
+              console.log("you is " + you);
+
+            }); 
+        });
+ 
+        // on() is called whenever a value is changed in the firebase
+        // (e.g. by someone else). whatever the new value is comes in
+        // as a parameter called dataSnapshot
+        fb.on('value',function(dataSnapshot) {
+            
+            if(first){                //does not record initial variable
+              first = false;
+              return;
+            }
+
+            other = dataSnapshot.val();     //get updated variable
+
+            console.log("other is " + other);
+
+            if ( window.you === other ){
+              window.location.replace("http://illinois.edu");
+            };
+        });
+ 
+ 
+    </script>
+ 
+  </body>
+</html>
