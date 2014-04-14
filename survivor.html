@@ -1,22 +1,59 @@
+
 <html>
   <head>
+    <!-- load the firebase and jQuery libraries -->
     <script src='https://cdn.firebase.com/v0/firebase.js'></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script> 
-    <title>Virtual Survivors</title>
+    <title>Survivor</title>
+  <style>
+        #container { 
+          margin:0 auto;
+        }
+ 
+        body { 
+          font-size:800%;
+          font-family:Helvetica;
+          font-weight:bold;
+          -webkit-user-select:none;
+          text-align:center;
+        }
+ 
+        .hovertext { color:red; }
+        .activatedtext { color:purple; }
+        .offtext { color:black; }
+ 
+    </style>
+ 
+ 
+ 
   </head>
  
   <body> 
-     
+
+ 
+    <!-- you can insert javascript in a webpage using the <script> tag -->
     <script>
+ 
+        // load jQuery on j
         var j = jQuery.noConflict();
+ 
+        // create our firebase variable --> you'll want to replace
+        // the first part of the domain name with your own firebase name
+        // notice the 'count' at the end --- this is the key we'll create
+        // and use in the firebase
         var fb = new Firebase("https://internet-survivor.firebaseio.com/player");
+        var counter = new Firebase("https://internet-survivor.firebaseio.com/Counter");
+        
 
         //global variables
         var you;
         var first = true;
         var other;
  
+        // check to make sure the page has fully loaded. once it has, setup
+        // a few things
         j(document).ready(function() {
+ 
             fb.once('value',function(dataSnapshot) {
               you = dataSnapshot.val();
 
@@ -26,25 +63,56 @@
               else{
                 fb.set(true);
               }
+
+              console.log("you is " + you);
+
             }); 
         });
  
-
+        // on() is called whenever a value is changed in the firebase
+        // (e.g. by someone else). whatever the new value is comes in
+        // as a parameter called dataSnapshot
+        function changeval(value) {
+            counter.transaction(function(current) {
+                return current + value;
+            });
+        }
+        
         fb.on('value',function(dataSnapshot) {
             
-            //skip initial variable
-            if(first){
+            if(first){                //does not record initial variable
               first = false;
               return;
             }
 
-            other = dataSnapshot.val();
+            other = dataSnapshot.val();     //get updated variable
 
-            if ( you === other ){
+            console.log("other is " + other);
+
+            if ( window.you === other ){
+            
               window.location.replace("http://illinois.edu");
+              changeval(1);
             };
         });
-        
+  
+  counter.on('value',function(dataSnapshot) {
+ 
+            // extract the data from dataSnapshot with val()
+            var data = dataSnapshot.val();
+ 
+            // change the text of #count to reflect the new value
+            j('#count').text(data);
+        });
+ 
     </script>
+    
+     <div id="container">
+       <div id="count">counter</div>
+       <div id="plus">Users have been outcast</div>
+    
+     
+    </div>
+ 
   </body>
 </html>
