@@ -112,6 +112,9 @@
             	if( elapsed > topScore){
             		highScorer.set(window.prompt("Congratulations! You set a new high score. Enter your name.",""));
             	}
+            	else{
+            		window.alert("You lose!");
+            	}
             	window.location.replace("http://illinois.edu");
             	changeval(1);
             };
