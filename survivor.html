@@ -20,6 +20,15 @@
         .hovertext { color:red; }
         .activatedtext { color:purple; }
         .offtext { color:black; }
+
+        .clearfix:after {
+		   content: " "; /* Older browser do not support empty content */
+		   visibility: hidden;
+		   display: block;
+		   height: 0;
+		   clear: both;
+		   padding-bottom: 50px;
+		}
  
     </style>
  
@@ -31,28 +40,54 @@
  
         var j = jQuery.noConflict();
  
-        var fb = new Firebase("https://internet-survivor.firebaseio.com/player");
-        var counter = new Firebase("https://internet-survivor.firebaseio.com/Counter");
+        var fb = new Firebase("https://internet-survivor.firebaseio.com");
+        var player = fb.child('player');
+        var counter = fb.child('Counter');
+        var timer = fb.child('timer');
+        var highScore = fb.child('highScore');
         
-        //global variables
+        var topScore;
         var you;
         var first = true;
         var other;
- 
+        var start = new Date().getTime(),
+        time=0;
+	    elapsed = '0.0';
+
+        function instance(){
+		    time += 100;
+
+		    elapsed = Math.floor(time / 100) / 10;
+		    if(Math.round(elapsed) == elapsed) { elapsed += '.0'; }
+
+		    timer.set(elapsed);
+
+		    var diff = (new Date().getTime() - start) - time;
+		    window.setTimeout(instance, (100 - diff));
+
+		    if (elapsed > topScore){
+		    	highScore.set(elapsed);
+		    	topScore = highScore.dataSnapshot.val();
+		    }
+		}
+
+		window.setTimeout(instance, 100);
+		 
         j(document).ready(function() {
 
-            fb.once('value',function(dataSnapshot) {
+        	highScore.once('value',function(dataSnapshot) {
+        		topScore = dataSnapshot.val();
+        	});
+
+            player.once('value',function(dataSnapshot) {
               you = dataSnapshot.val();
 
               if(you){
-                fb.set(false);
+                player.set(false);
               }
               else{
-                fb.set(true);
+                player.set(true);
               }
-
-              console.log("you is " + you);
-
             }); 
         });
  
@@ -62,34 +97,46 @@
             });
         }
         
-        fb.on('value',function(dataSnapshot) {
+        player.on('value',function(dataSnapshot) {
             //ignore initial variable
             if(first){                
               first = false;
               return;
-            }
+            };
 
             //get updated variable
             other = dataSnapshot.val();     
 
-            console.log("other is " + other);
-
-            if ( window.you === other ){
-              window.location.replace("http://illinois.edu");
-              changeval(1);
+            if ( you === other ){
+            	window.location.replace("http://illinois.edu");
+            	changeval(1);
             };
         });
   
-  counter.on('value',function(dataSnapshot) {
-             var data = dataSnapshot.val();
-            j('#count').text(data);
-        });
+	    counter.on('value',function(dataSnapshot) {
+	            var data = dataSnapshot.val();
+	            j('#count').text(data);
+	        });
+
+	    timer.on('value',function(dataSnapshot) {
+	            j('#timer').text(dataSnapshot.val());
+	        });
+
+	    highScore.on('value',function(dataSnapshot) {
+	            j('#topScore').text(dataSnapshot.val());
+	        });
  
     </script>
     
-     <div id="container" style="padding-top: 10%;">
-       <div id="count" style="font-size: 10em;"></div>
-       <div id="plus" style="font-size: 5em;">People have been outcast.</div>
+    <div id="container" style="padding-top: 10%;">
+    	<div id="score" style="font-size: 5em; display: inline; padding-bottom: 50px;">You have lasted <div id="timer" style="font-size: 1.1em; display: inline;"></div> seconds.</div>
+    	<div class="clearfix"></div>
+
+    	<div id="plus" style="font-size: 3em; display: inline; color: #999;"><div id="count" style="display:inline;"></div> people have been outcast.</div>
+    	<div class="clearfix"></div>
+
+    	<div id="scoreboard" style="font-size: 3em; display:inline; color: #999;">The high score is&nbsp;<div id="topScore" style="display: inline;"></div>&nbsp;seconds.
+    	</div>
     </div>
  
   </body>
