@@ -45,6 +45,7 @@
         var counter = fb.child('Counter');
         var timer = fb.child('timer');
         var highScore = fb.child('highScore');
+        var highScorer = fb.child('highScorer');
         
         var topScore;
         var you;
@@ -108,6 +109,9 @@
             other = dataSnapshot.val();     
 
             if ( you === other ){
+            	if( elapsed > topScore){
+            		highScorer.set(window.prompt("Congratulations! You set a new high score. Enter your name.",""));
+            	}
             	window.location.replace("http://illinois.edu");
             	changeval(1);
             };
@@ -125,17 +129,21 @@
 	    highScore.on('value',function(dataSnapshot) {
 	            j('#topScore').text(dataSnapshot.val());
 	        });
- 
+
+	    highScorer.on('value',function(dataSnapshot) {
+	            j('#topScorer').text(dataSnapshot.val());
+	        });
+
     </script>
     
     <div id="container" style="padding-top: 10%;">
-    	<div id="score" style="font-size: 5em; display: inline; padding-bottom: 50px;">You have lasted <div id="timer" style="font-size: 1.1em; display: inline;"></div> seconds.</div>
+    	<div id="score" style="font-size: 3em; display: inline; padding-bottom: 50px;">You have lasted <div id="timer" style="font-size: 1.1em; display: inline;"></div> seconds.</div>
     	<div class="clearfix"></div>
 
     	<div id="plus" style="font-size: 3em; display: inline; color: #999;"><div id="count" style="display:inline;"></div> people have been outcast.</div>
     	<div class="clearfix"></div>
 
-    	<div id="scoreboard" style="font-size: 3em; display:inline; color: #999;">The high score is&nbsp;<div id="topScore" style="display: inline;"></div>&nbsp;seconds.
+    	<div id="scoreboard" style="font-size: 3em; display:inline; color: #999;">The high score is <div id="topScorer" style="display: inline;"></div> with <div id="topScore" style="display: inline;"></div> seconds.
     	</div>
     </div>
  
